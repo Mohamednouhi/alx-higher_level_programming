@@ -19,45 +19,55 @@ class Base:
         if id is None:
             Base.__nb_objects += 1
             self.id = Base.__nb_objects
+
+    @staticmethod
+    def to_json_string(list_dictionaries):
+        """Return the JSON string representation of list_dictionaries."""
+        if list_dictionaries is None or len(list_dictionaries) == 0:
+            return "[]"
+        else:
+            return json.dumps(list_dictionaries)
+
+    @classmethod
+    def save_to_file(cls, list_objs):
+        """Write the JSON string representation of list_objs to a file."""
+        l_o = "[]"
+        filename = str(cls.__name__) + ".json"
+        if list_objs is not None:
+            l_o = cls.to_json_string([ob.to_dictionary() for ob in list_objs])
+        with open(filename, 'w') as f:
+            f.write(l_o)
+
     @staticmethod
     def from_json_string(json_string):
         """Return the list of the JSON string representation json_string."""
-        if json_string is None or json_string == "":
-            return []
-        return json.loads(json_string)
+        str_list = []
+        if json_string is not None and len(json_string) > 0:
+            str_list = json.loads(json_string)
+        return str_list
 
     @classmethod
     def create(cls, **dictionary):
         """Return an instance with all attributes already set."""
         if cls.__name__ == "Rectangle":
-            dummy = cls(1, 1)  # Create a dummy Rectangle instance
-        elif cls.__name__ == "Square":
-            dummy = cls(1)  # Create a dummy Square instance
+            dummy = cls(1, 1)
         else:
-            return None
-
+            dummy = cls(1)
         dummy.update(**dictionary)
         return dummy
 
     @classmethod
-    def save_to_file(cls, list_objs):
-        """Write the JSON string representation of list_objs to a file."""
-        if list_objs is None:
-            list_objs = []
-        filename = cls.__name__ + ".json"
-        json_list = [obj.to_dictionary() for obj in list_objs]
-        with open(filename, 'w') as file:
-            file.write(cls.to_json_string(json_list))
-
-    @classmethod
     def load_from_file(cls):
-        """Return a list of instances from a JSON file."""
-        filename = cls.__name__ + ".json"
+        """Return a list of instances from a file."""
+        filename = str(cls.__name__) + ".json"
+        dict_list = []
         try:
             with open(filename, 'r') as file:
-                json_string = file.read()
-                json_list = cls.from_json_string(json_string)
-                return [cls.create(**obj) for obj in json_list]
+                data_str = file.read()
+                str_list = cls.from_json_string(data_str)
+                for dictionary in str_list:
+                    dict_list.append(cls.create(**dictionary))
+                return dict_list
         except FileNotFoundError:
-            return []
+            return dict_list
 

@@ -6,7 +6,8 @@ module.exports = class Rectangle {
 			this.height = h;
 			this.weight = w;
 		} else {
-			return {};
+			this.height = undefined;
+			this.width = undefined;
 		}
 	}
 };
